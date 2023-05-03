@@ -1,0 +1,8 @@
+#!/bin/bash
+
+# I think I need this for crontab to work
+cd "$(dirname "$0")"
+
+source venv/bin/activate
+
+python3 -m rss_to_nostr
