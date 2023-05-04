@@ -10,6 +10,8 @@ Inspiration: https://dergigi.com/2023/01/19/how-to-build-a-nostr-gm-bot/
 
 - https://nostr.build
 
+- https://github.com/PlebeiusGaragicus/nostr-rss-bot
+
 # contribute
 
 - https://github.com/fiatjaf/noscl
