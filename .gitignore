@@ -1,6 +1,10 @@
 venv/
-logs/
-
-.env
+__pycache__/
 
 .DS_Store
+
+logs/
+data/
+.env
+
+last_processed_articles.json
