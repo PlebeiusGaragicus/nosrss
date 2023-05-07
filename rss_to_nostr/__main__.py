@@ -16,11 +16,12 @@ def fetch_rss_feed(url):
     return feed.entries
 
 def post_to_nostr(title, link):
-    # Replace 'nostr_cli_app' with the actual command-line application name
-    print(f"Posting to Nostr: {title} - {link}")
-    # cmd = f"nostr_cli_app --title \"{title}\" --link \"{link}\""
-    # process = subprocess.Popen(cmd, shell=True)
-    # process.wait()
+    # print(f"Posting to Nostr: {title} - {link}")
+    cmd = f"""nospy publish \"{title}
+
+{link}\""""
+    process = subprocess.Popen(cmd, shell=True)
+    process.wait()
 
 last_processed_article_id = None
 
