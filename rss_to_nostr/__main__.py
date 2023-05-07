@@ -80,9 +80,10 @@ def process_feed():
 
 
 if __name__ == "__main__":
-    while True:
-        process_feed()
-        time.sleep(FETCH_INTERVAL)
+    process_feed()
+    # while True:
+    #     process_feed()
+    #     time.sleep(FETCH_INTERVAL)
 
 
 # if __name__ == "__main__":
