@@ -5,4 +5,4 @@ cd "$(dirname "$0")"
 
 source venv/bin/activate
 
-python3 -m rss_to_nostr
+python3 -m nosrss "$@"

@@ -1,4 +1,4 @@
-# rss_to_nostr
+# nosrss
 > It scrapes the thing so it can send it to the... oh, you know what I mean..!
 
 
@@ -27,6 +27,8 @@ TODO: DM with zaps?  Hermmm....
 - https://blog.feedspot.com/verge_rss_feeds/
 
 - https://www.theverge.com/rss/index.xml
+
+- https://www.theverge.com/rss/full.xml
 
 ## Reviews
 
