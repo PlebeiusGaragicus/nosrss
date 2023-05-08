@@ -28,6 +28,8 @@ TODO: DM with zaps?  Hermmm....
 
 - https://www.theverge.com/rss/index.xml
 
+- https://www.theverge.com/rss/full.xml
+
 ## Reviews
 
 Full articles

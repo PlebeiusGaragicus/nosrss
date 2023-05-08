@@ -2,47 +2,28 @@ import os
 import subprocess
 import feedparser
 import json
-import time
+import docopt
+
+RSS_URL = "https://www.theverge.com/rss/index.xml"
 
 FETCH_INTERVAL = 60 * 10 # minutes
+last_processed_article_id = None
 
 def fetch_rss_feed(url):
     feed = feedparser.parse(url)
     print(f"Fetching feed: {url}")
 
-    # print(f"{feed.keys()}")
-    # dict_keys(['bozo', 'entries', 'feed', 'headers', 'etag', 'href', 'status', 'encoding', 'version', 'namespaces'])
-
     return feed.entries
 
 def post_to_nostr(title, link):
-    # print(f"Posting to Nostr: {title} - {link}")
+    print(f"Posting to Nostr: {title} - {link}")
+
     cmd = f"""nospy publish \"{title}
 
 {link}\""""
     process = subprocess.Popen(cmd, shell=True)
     process.wait()
 
-last_processed_article_id = None
-
-# def process_feed():
-#     global last_processed_article_id
-#     # rss_url = "https://www.theverge.com/rss/index.xml"
-#     rss_url = "https://www.theverge.com/reviews/rss/index.xml"
-#     entries = fetch_rss_feed(rss_url)
-
-#     # if last_processed_article_id is None:
-#     #     last_processed_article_id = entries[0].id
-
-#     for entry in entries:
-#         print(entry['title'], entry['link'])
-#     #     if entry.id == last_processed_article_id:
-#     #         break
-
-#     #     # post_to_nostr(entry.title, entry.link)
-#     #     print(f"${entry.title} - {entry.link}")
-
-#     # last_processed_article_id = entries[0].id
 
 
 def process_feed():
@@ -54,9 +35,7 @@ def process_feed():
     else:
         last_processed_articles = []
 
-    # rss_url = "https://www.theverge.com/reviews/rss/index.xml"
-    rss_url = "https://www.theverge.com/rss/index.xml"
-    entries = fetch_rss_feed(rss_url)
+    entries = fetch_rss_feed(RSS_URL)
 
     entries_to_post = []
 
@@ -79,11 +58,21 @@ def process_feed():
 
 
 
-if __name__ == "__main__":
+def main():
     process_feed()
-    # while True:
-    #     process_feed()
-    #     time.sleep(FETCH_INTERVAL)
+
+
+
+
+
+
+
+
+
+
+# while True:
+#     process_feed()
+#     time.sleep(FETCH_INTERVAL)
 
 
 # if __name__ == "__main__":
