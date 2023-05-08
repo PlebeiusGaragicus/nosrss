@@ -7,14 +7,10 @@ from pathlib import Path
 import subprocess
 import feedparser
 from dateutil import parser
-# import schedule
 import docopt
 
 from nosrss.usage import USAGE
 from nosrss.version import VERSION
-
-
-# FETCH_INTERVAL = 60 * 10 # minutes
 
 
 def generate_filename(url):
@@ -40,25 +36,15 @@ def generate_filename(url):
 
 
 
-
 def fetch_rss_feed(url):
     feed = feedparser.parse(url)
-    # print(f"Fetching feed: {url}")
 
     return feed.entries
 
 
-
 def post_to_nostr(title, link):
-    # I think this is used to properly escape any quotes in the title and link
-    # DO NOT use this.. it ruins apostrophes like "Oppenheimer’s"
-    # title = json.dumps(title)[1:-1]
-    # link = json.dumps(link)[1:-1]
+    # escape double quotes
     title = title.replace('"', '\\"')
-    link = link.replace('"', '\\"')
-
-    # print(f"Posting to Nostr:\n{title}\n\n{link}")
-    # return
 
     cmd = f"""nospy publish \"{title}\n\n{link}\""""
 
@@ -67,23 +53,6 @@ def post_to_nostr(title, link):
     process.wait()
 
 
-
-
-# published
-# published_parsed
-# updated
-# updated_parsed
-# title
-# title_detail
-# content
-# summary
-# links
-# link
-# id
-# guidislink
-# authors
-# author_detail
-# author
 def process_feed(url: str):
     file_name = generate_filename(url)
     entries = fetch_rss_feed(url)
@@ -94,7 +63,6 @@ def process_feed(url: str):
             last_processed_article = json.load(f)
     else:
         last_processed_article = None
-
 
 
     # Sort entries by published date
@@ -112,7 +80,6 @@ def process_feed(url: str):
             if entry_published_datetime > last_published_datetime:
                 next_newest_article = entry
                 break
-
     else:
         next_newest_article = entries[0]  # Post the first article if no last_processed_article found
 
@@ -124,13 +91,7 @@ def process_feed(url: str):
         with open(file_name, "w") as f:
             json.dump({"id": next_newest_article.id, "published": next_newest_article.published}, f)
     else:
-        print("No more articles to post.")
-
-
-
-
-
-
+        print("No new articles to post.")
 
 
 def main():
@@ -152,17 +113,6 @@ def main():
             print("URL seems improperly formatted")
         # else:
             # print("No URL provided") # I don't think I need this since docopt will handle it
-
-
-
-
-
-
-
-# while True:
-#     process_feed()
-#     time.sleep(FETCH_INTERVAL)
-
 
 
 #     schedule.every(fetch_interval).minutes.do(process_feed)

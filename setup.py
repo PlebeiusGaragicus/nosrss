@@ -20,9 +20,7 @@ setup(
     classifiers=[
         # Choose classifiers from https://pypi.org/classifiers/
         # TODO:
-        "Development Status :: 3 - Alpha",
         "License :: OSI Approved :: MIT License",
-        "Operating System :: OS Independent",
         "Programming Language :: Python",
         "Programming Language :: Python :: 3",
     ],

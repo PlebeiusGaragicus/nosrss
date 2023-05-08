@@ -4,5 +4,3 @@ Usage:
   nosrss version
   nosrss fetch --url=<url>
 """
-
-# nosrss fetch --url="https://www.theverge.com/rss/index.xml"
