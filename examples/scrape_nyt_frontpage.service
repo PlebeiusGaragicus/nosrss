@@ -1,0 +1,12 @@
+[Unit]
+Description=Scrape front page of NYT under TurkeyBiscuit nostr account
+After=network.target
+
+[Service]
+User=turkeybiscuit
+WorkingDirectory=/home/turkeybiscuit
+ExecStart=/bin/bash /home/turkeybiscuit/scrape_nyt
+Restart=always    
+
+[Install]
+WantedBy=multi-user.target
