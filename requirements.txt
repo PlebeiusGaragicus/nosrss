@@ -1,2 +1,3 @@
 feedparser
-schedule
+docopt
+python-dateutil

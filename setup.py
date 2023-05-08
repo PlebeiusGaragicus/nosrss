@@ -3,16 +3,18 @@ from setuptools import setup, find_packages
 from nosrss.version import VERSION
 
 setup(
-    name='rss_to_nostr',
+    name='nosrss',
     version=VERSION,
     description='A command-line utility for nostr',
     author='Micah Fullerton',
     author_email='plebeiusgaragicus@gmail.com',
-    url='https://github.com/PlebeiusGaragicus/rss_to_nostr',
+    url='https://github.com/PlebeiusGaragicus/nosrss',
     packages=find_packages(),
     install_requires=[
         # List your app's dependencies here
         'docopt',
+        'feedparser',
+        'python-dateutil',
         'nospy',
     ],
     classifiers=[
@@ -26,7 +28,7 @@ setup(
     ],
     entry_points={
         'console_scripts': [
-            'rss_to_nostr=rss_to_nostr:main',
+            'nosrss=nosrss:main',
         ],
     },
 )

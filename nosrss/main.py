@@ -1,68 +1,157 @@
 import os
+import json
+import re
+import urllib
+from pathlib import Path
+
 import subprocess
 import feedparser
-import json
+from dateutil import parser
+# import schedule
 import docopt
 
-RSS_URL = "https://www.theverge.com/rss/index.xml"
+from nosrss.usage import USAGE
+from nosrss.version import VERSION
 
-FETCH_INTERVAL = 60 * 10 # minutes
-last_processed_article_id = None
+
+# FETCH_INTERVAL = 60 * 10 # minutes
+
+
+def generate_filename(url):
+    parsed_url = urllib.parse.urlparse(url)
+
+    # Extract the domain name
+    domain_name = parsed_url.netloc
+
+    # Remove 'www.' if present
+    if domain_name.startswith("www."):
+        domain_name = domain_name[4:]
+
+    # Remove the TLD (Top Level Domain)
+    domain_name = domain_name.rsplit(".", 1)[0]
+
+    home = Path.home()
+    config_dir = home / ".config" / "nosrss"
+    config_dir.mkdir(parents=True, exist_ok=True)
+    file_path = config_dir / domain_name
+
+    # return f"{domain_name}"
+    return str(file_path)
+
+
+
 
 def fetch_rss_feed(url):
     feed = feedparser.parse(url)
-    print(f"Fetching feed: {url}")
+    # print(f"Fetching feed: {url}")
 
     return feed.entries
 
+
+
 def post_to_nostr(title, link):
-    print(f"Posting to Nostr: {title} - {link}")
+    # I think this is used to properly escape any quotes in the title and link
+    # DO NOT use this.. it ruins apostrophes like "Oppenheimer’s"
+    # title = json.dumps(title)[1:-1]
+    # link = json.dumps(link)[1:-1]
+    title = title.replace('"', '\\"')
+    link = link.replace('"', '\\"')
 
-    cmd = f"""nospy publish \"{title}
+    # print(f"Posting to Nostr:\n{title}\n\n{link}")
+    # return
 
-{link}\""""
+    cmd = f"""nospy publish \"{title}\n\n{link}\""""
+
     process = subprocess.Popen(cmd, shell=True)
+    # TODO: see if nospy exited with an error.. or maybe nospy isn't found.. or something.
     process.wait()
 
 
 
-def process_feed():
-    print("Processing feed...")
-    # Load the last_processed_articles from file
-    if os.path.exists("last_processed_articles.json"):
-        with open("last_processed_articles.json", "r") as f:
-            last_processed_articles = json.load(f)
+
+# published
+# published_parsed
+# updated
+# updated_parsed
+# title
+# title_detail
+# content
+# summary
+# links
+# link
+# id
+# guidislink
+# authors
+# author_detail
+# author
+def process_feed(url: str):
+    file_name = generate_filename(url)
+    entries = fetch_rss_feed(url)
+
+    # Load the last_processed_article from file
+    if os.path.exists(file_name):
+        with open(file_name, "r") as f:
+            last_processed_article = json.load(f)
     else:
-        last_processed_articles = []
+        last_processed_article = None
 
-    entries = fetch_rss_feed(RSS_URL)
 
-    entries_to_post = []
 
-    for entry in entries:
-        if entry.id in last_processed_articles:
-            continue
+    # Sort entries by published date
+    entries.sort(key=lambda entry: parser.parse(entry.published))
 
-        entries_to_post.append(entry)
+    next_newest_article = None
 
-    for entry in entries_to_post:
-        post_to_nostr(entry.title, entry.link)
-        last_processed_articles.append(entry.id)
+    if last_processed_article:
+        last_published_datetime = parser.parse(last_processed_article["published"])
 
-    # Keep only the last 20 processed articles
-    last_processed_articles = last_processed_articles[-20:]
+        # Find the next newest article after the last one processed
+        for entry in entries:
+            entry_published_datetime = parser.parse(entry.published)
 
-    # Save the last_processed_articles to file
-    with open("last_processed_articles.json", "w") as f:
-        json.dump(last_processed_articles, f)
+            if entry_published_datetime > last_published_datetime:
+                next_newest_article = entry
+                break
+
+    else:
+        next_newest_article = entries[0]  # Post the first article if no last_processed_article found
+
+    if next_newest_article:
+        # print(f"Posting article: {next_newest_article.title}")
+        post_to_nostr(next_newest_article.title, next_newest_article.link)
+
+        # Save the last_processed_article to file
+        with open(file_name, "w") as f:
+            json.dump({"id": next_newest_article.id, "published": next_newest_article.published}, f)
+    else:
+        print("No more articles to post.")
+
+
+
+
+
 
 
 
 def main():
-    process_feed()
+    args = docopt.docopt(USAGE, version=f"nospy {VERSION}")
 
+    if args.get("version", False):
+        print(f"nosrss {VERSION}")
+    if args.get("fetch", False):
+        url = args.get("--url", None)
 
-
+        # if url is not None:
+        # This regular expression matches the beginning of URLs with either "http://" or "https://" and will also match if "www." is present after the protocol.
+        matched = re.match("https?:\/\/(?:www\.)?", url)
+        if matched is not None:
+            # Do something with the matched URL
+            # print(f"URL matched: {url}")
+            process_feed(url)
+        else:
+            print("URL seems improperly formatted")
+        # else:
+            # print("No URL provided") # I don't think I need this since docopt will handle it
 
 
 
@@ -75,11 +164,8 @@ def main():
 #     time.sleep(FETCH_INTERVAL)
 
 
-# if __name__ == "__main__":
-#     # fetch_interval = 0.1  # minutes
-#     fetch_interval = 10  # minutes
-#     schedule.every(fetch_interval).minutes.do(process_feed)
 
+#     schedule.every(fetch_interval).minutes.do(process_feed)
 #     process_feed()
 #     while True:
 #         schedule.run_pending()
