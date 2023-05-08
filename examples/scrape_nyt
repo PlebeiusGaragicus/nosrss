@@ -1,0 +1,10 @@
+#!/bin/bash
+
+while true; do
+    nosrss fetch --url=https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml
+    sleep 438 # Sleep for 6 minutes (360 seconds)
+done
+
+exit
+
+# NOTE: make executible via: chmod +x ./scrapt_nyt
