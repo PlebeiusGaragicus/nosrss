@@ -19,19 +19,16 @@ def generate_filename(url):
     # Extract the domain name
     domain_name = parsed_url.netloc
 
-    # Remove 'www.' if present
-    if domain_name.startswith("www."):
-        domain_name = domain_name[4:]
+    # Get the remaining URL path after the domain name, replace '/' with '_'
+    path = parsed_url.path.replace('/', '_')
 
-    # Remove the TLD (Top Level Domain)
-    domain_name = domain_name.rsplit(".", 1)[0]
+    # Concatenate domain name and path to get the full name
+    full_name = domain_name + path
 
-    home = Path.home()
-    config_dir = home / ".config" / "nosrss"
+    config_dir = Path.home() / ".config" / "nosrss"
     config_dir.mkdir(parents=True, exist_ok=True)
-    file_path = config_dir / domain_name
+    file_path = config_dir / full_name
 
-    # return f"{domain_name}"
     return str(file_path)
 
 
