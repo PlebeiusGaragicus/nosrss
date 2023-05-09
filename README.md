@@ -47,20 +47,26 @@ which nosrss
 nosrss version
 ```
 
-4. Create a new user account for the bot using `useradd`
+4. Create a new user account that will run your bots using `useradd`
 
 ## setup bot user account
 
-1. Login as the new user that will act as the bot
+1. Login as the new user your just created
 
-2. Setup `nospy`  with private key, add needed relays and ensure profile is setup
+2. Setup `nospy` with a private key, add needed relays and ensure profile the is setup
+
+NOTE: `nospy` is now multi-user capable so remember to set `export NOSPY_USER=<nostr_user>` while setting up each bot account with `nospy`
 
 3. Create bot script in home directory - see example:
 
-NOTE: Replace <RSS_URL> with the URL of the RSS feed you are scraping
+NOTE: Replace <nostr_user> with the username you setup `nospy` with
+
+NOTE: Replace <RSS_URL> with the URL of the RSS feed you are scraping.
 
 ```
 #!/bin/bash
+
+export NOSPY_USER=<nostr_user>
 
 while true; do
     nosrss fetch --url=<RSS_URL>
