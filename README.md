@@ -63,13 +63,20 @@ NOTE: Replace <nostr_user> with the username you setup `nospy` with
 
 NOTE: Replace <RSS_URL> with the URL of the RSS feed you are scraping.
 
-```
+```sh
 #!/bin/bash
 
-export NOSPY_USER=<nostr_user>
+export NOSPY_USER=<nospy_user>
 
 while true; do
-    nosrss fetch --url=<RSS_URL>
+    POST=$(nosrss fetch --url=<RSS_URL>)
+
+    if [ $? -ne 0 ]; then
+        echo "Error: nosrss command failed"
+        exit 1
+    fi
+
+    nospy publish "$POST"
     sleep 360 # Sleep for 6 minutes
 done
 ```
