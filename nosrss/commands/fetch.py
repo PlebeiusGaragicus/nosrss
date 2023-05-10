@@ -1,3 +1,4 @@
+import sys
 import os
 import json
 import re
@@ -38,15 +39,15 @@ def fetch_rss_feed(url):
 
 
 
-def post_to_nostr(title, link):
-    # escape double quotes
-    title = title.replace('"', '\\"')
+# def post_to_nostr(title, link):
+#     # escape double quotes
+#     title = title.replace('"', '\\"')
 
-    cmd = f"""nospy publish \"{title}\n\n{link}\""""
+#     cmd = f"""nospy publish \"{title}\n\n{link}\""""
 
-    process = subprocess.Popen(cmd, shell=True)
-    # TODO: see if nospy exited with an error.. or maybe nospy isn't found.. or something.
-    process.wait()
+#     process = subprocess.Popen(cmd, shell=True)
+#     # TODO: see if nospy exited with an error.. or maybe nospy isn't found.. or something.
+#     process.wait()
 
 
 
@@ -96,14 +97,18 @@ def fetch(args):
                 next_newest_article = entry
                 break
     else:
-        next_newest_article = entries[0]  # Post the first article if no last_processed_article found
+        try:
+            next_newest_article = entries[0]  # Post the first article if no last_processed_article found
+        except IndexError:
+            print("Unable to find any articles")
+            sys.exit(1)
 
     if next_newest_article:
-        if test_mode:
+        # if test_mode:
             # print(f"Posting article: {next_newest_article.title}")
-            print(f"{next_newest_article.title}\n\n{next_newest_article.link}")
-        else:
-            post_to_nostr(next_newest_article.title, next_newest_article.link)
+        print(f"{next_newest_article.title}\n\n{next_newest_article.link}")
+        # else:
+            # post_to_nostr(next_newest_article.title, next_newest_article.link)
 
         # Save the last_processed_article to file
         with open(file_name, "w") as f:
