@@ -2,5 +2,5 @@
 USAGE = """
 Usage:
   nosrss version
-  nosrss fetch --url=<url> [--test]
+  nosrss fetch --url=<url>
 """

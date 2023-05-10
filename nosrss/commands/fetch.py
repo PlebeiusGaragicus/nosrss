@@ -5,6 +5,9 @@ import re
 import urllib
 from pathlib import Path
 
+import logging
+logger = logging.getLogger("nosrss")
+
 import subprocess
 import feedparser
 from dateutil import parser
@@ -34,7 +37,7 @@ def generate_filename(url):
 def fetch_rss_feed(url):
     feed = feedparser.parse(url)
 
-    # print(feed)
+    #logger.debug(feed)
     return feed.entries
 
 
@@ -60,17 +63,17 @@ def fetch(args):
     #TODO: I fucked it up... This regular expression matches the beginning of URLs with either "http://" or "https://" and will also match if "www." is present after the protocol.
     matched = re.match("https?:\/\/(?:www\.)?", url)
     if matched is None:
-        print("URL seems improperly formatted")
+        logger.error("URL seems improperly formatted")
         return
     
-    test_mode = args.get("--test", False)
+    # test_mode = args.get("--test", False)
 
 
     file_name = generate_filename(url)
     entries = fetch_rss_feed(url)
 
     if len(entries) == 0:
-        print("No entries")
+        logger.error("Given RSS feed has no entries")
         return
 
     # Load the last_processed_article from file
@@ -100,18 +103,15 @@ def fetch(args):
         try:
             next_newest_article = entries[0]  # Post the first article if no last_processed_article found
         except IndexError:
-            print("Unable to find any articles")
+            logger.error("Unable to find any articles")
             sys.exit(1)
 
     if next_newest_article:
-        # if test_mode:
-            # print(f"Posting article: {next_newest_article.title}")
-        print(f"{next_newest_article.title}\n\n{next_newest_article.link}")
-        # else:
-            # post_to_nostr(next_newest_article.title, next_newest_article.link)
-
         # Save the last_processed_article to file
         with open(file_name, "w") as f:
             json.dump({"id": next_newest_article.id, "published": next_newest_article.published}, f)
+
+        # NOTE: this utility is used to print to the console.  Make sure the file writes before printing
+        print(f"{next_newest_article.title}\n\n{next_newest_article.link}")
     else:
-        print("No new articles to post.")
+        logger.info("No new articles to post.")

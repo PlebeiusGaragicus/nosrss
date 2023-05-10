@@ -76,7 +76,12 @@ while true; do
         exit 1
     fi
 
-    nospy publish "$POST"
+    if [[ -n "$POST" ]]; then
+        nospy publish "$POST"
+    else
+        echo "norsrr did not fetch any new posts."
+    fi
+
     sleep 360 # Sleep for 6 minutes
 done
 ```
@@ -119,6 +124,10 @@ sudo systemctl start <SERVICE_NAME>.service
 
 # If you want your service to start automatically when the system boots, run the following command:
 sudo systemctl enable <SERVICE_NAME>.service
+
+# disable a service from starting automatically:
+sudo systemctl disable <SERVICE_NAME>.service
+# Removed /etc/systemd/system/multi-user.target.wants/<SERVICE_NAME>.service
 
 # To check the status of your service, run the following command:
 sudo systemctl status <SERVICE_NAME>.service
