@@ -1,0 +1,72 @@
+#!/bin/bash
+
+
+echo
+echo "This script creates the scraping script and configures nospy for the new bot account."
+read -p "Press Enter to continue or Ctrl+C to cancel."
+echo
+
+# SET USERNAME
+read -p "nostr-bot username: " username
+export NOSPY_USER=$username
+
+export linuxuser=satoshi
+export script_filename=/home/$linuxuser/scrape@$NOSPY_USER.sh
+
+
+
+# SET USERNAME
+# if [ -z "$NOSPY_USER" ]; then
+#     read -p "nostr-bot username: " NOSPY_USER
+# else
+#     echo "using nostr-bot username: $NOSPY_USER"
+# fi
+
+
+
+# SET RSS URL
+read -p "RSS feed URL: " rssurl
+
+
+
+# SET PRIVATE KEY
+# old way: nospy setprivate $(nospy keygen --noformat | head -n 1)
+read -p "Private key (press Enter to generate a new one): " private_key
+if [ -z "$private_key" ]; then
+    private_key=$(nospy keygen --noformat | head -n 1)
+fi
+nospy setprivate $private_key
+
+echo =====================
+nospy private
+echo =====================
+
+
+# CREATE SCRAPING SCRIPT
+# it's crucial to remember that inside the here-document (<<EOF ... EOF), variables are expanded when the document is created. This means you need to escape the dollar signs $ with backslashes \ for variables that you want to be evaluated when the script scrape@$username.sh is run, not when it's created.
+# cat << EOF > "scrape@$NOSPY_USER.sh"
+cat << EOF > "$script_filename"
+#!/bin/bash
+
+export NOSPY_USER=$NOSPY_USER
+
+while true; do
+    POST=\$(nosrss fetch --url=$rssurl)
+
+    if [ \$? -ne 0 ]; then
+        echo "Error: nosrss command failed"
+        exit 1
+    fi
+
+    if [[ -n "\$POST" ]]; then
+        nospy publish "\$POST"
+    else
+        echo "norsrr did not fetch any new posts."
+    fi
+
+    sleep 360 # Sleep for 6 minutes
+done
+EOF
+
+# chmod +x "scrape@$NOSPY_USER.sh"
+chmod +x "$script_filename"

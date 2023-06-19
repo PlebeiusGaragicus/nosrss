@@ -2,15 +2,40 @@ import sys
 import os
 import json
 import re
+import html
 import urllib
 from pathlib import Path
 
 import logging
 logger = logging.getLogger("nosrss")
 
-import subprocess
 import feedparser
 from dateutil import parser
+
+
+def process_image_link(link):
+    # This function represents your image processing.
+    # Replace this with your actual image processing code.
+    # processed_link = link.replace('nitter.net', 'processed.net')
+
+    processed_link = "<IMAGE_LINK_HERE>"
+    return processed_link
+
+
+def process_nitter(text):
+    img_tags = re.findall('<img.*?src="(.*?)".*?/?>', text)  # Find all image src attributes
+    text_without_tags = re.sub('<.*?>', '', text)  # Remove all HTML tags
+    text_without_tags = html.unescape(text_without_tags)  # Convert HTML entities to their actual characters
+
+    # Remove 'RT by @username:' from start of text
+    text_without_rt = re.sub('^RT by @.*?:', '', text_without_tags).lstrip()
+
+    # Process the image urls and add them back to the text
+    for img_tag in img_tags:
+        processed_img_tag = process_image_link(img_tag)
+        text_without_rt += '\n' + processed_img_tag
+
+    return text_without_rt
 
 
 
@@ -36,22 +61,7 @@ def generate_filename(url):
 
 def fetch_rss_feed(url):
     feed = feedparser.parse(url)
-
-    #logger.debug(feed)
     return feed.entries
-
-
-
-# def post_to_nostr(title, link):
-#     # escape double quotes
-#     title = title.replace('"', '\\"')
-
-#     cmd = f"""nospy publish \"{title}\n\n{link}\""""
-
-#     process = subprocess.Popen(cmd, shell=True)
-#     # TODO: see if nospy exited with an error.. or maybe nospy isn't found.. or something.
-#     process.wait()
-
 
 
 def fetch(args):
@@ -66,7 +76,7 @@ def fetch(args):
         logger.error("URL seems improperly formatted")
         return
     
-    # test_mode = args.get("--test", False)
+    nitter = args.get("--nitter", False)
 
 
     file_name = generate_filename(url)
@@ -112,6 +122,9 @@ def fetch(args):
             json.dump({"id": next_newest_article.id, "published": next_newest_article.published}, f)
 
         # NOTE: this utility is used to print to the console.  Make sure the file writes before printing
-        print(f"{next_newest_article.title}\n\n{next_newest_article.link}")
+        if nitter:
+            print(f"{process_nitter(next_newest_article.summary)}")
+        else:
+            print(f"{next_newest_article.title}\n\n{next_newest_article.link}")
     else:
         logger.info("No new articles to post.")

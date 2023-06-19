@@ -1,0 +1,51 @@
+#!/bin/bash
+
+linuxuser=satoshi
+service_filename=rss@$NOSPY_USER.service
+service_fullpath=/etc/systemd/system/$service_filename
+
+# SET USERNAME
+read -p "nostr-bot username: " username
+NOSPY_USER=$username
+
+# if [ -z "$NOSPY_USER" ]; then
+#     read -p "nostr-bot username: " NOSPY_USER
+# else
+#     echo "using nostr-bot username: $NOSPY_USER"
+# fi
+
+echo
+echo "Creating systemd service for $NOSPY_USER"
+echo
+
+# cat << EOF > "/etc/systemd/system/scrape@$NOSPY_USER.service"
+cat << EOF > "$service_fullpath"
+[Unit]
+Description=Scrapes some website under XXX nostr account
+After=network.target
+
+[Service]
+User=$linuxuser
+WorkingDirectory=/home/$linuxuser
+ExecStart=/bin/bash $service_fullpath
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+# make systemd aware of new service
+systemctl daemon-reload
+
+# start newly created service
+echo systemctl start $service_filename
+
+# start automatically when system boots
+echo systemctl enable $service_filename
+
+# check status of service
+echo systemctl status $service_filename
+
+echo
+echo done.
+echo
