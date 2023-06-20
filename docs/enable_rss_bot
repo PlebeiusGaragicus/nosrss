@@ -1,6 +1,7 @@
 #!/bin/bash
 
-figlet -f slant "Enable a Nostr RSS Bot"
+echo -e "\n\n\n"
+echo -e "Enable a Nostr RSS Bot" | figlet | /usr/games/lolcat
 echo ----------------------------------------
 echo
 echo "NOTE: This script SHOULD be run as root."

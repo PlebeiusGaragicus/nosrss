@@ -1,6 +1,10 @@
 #!/bin/bash
 
-figlet -f slant "Create a Nostr RSS Bot"
+# TODO
+# whoami... if root.. then NO.. error out
+
+echo -e "\n\n\n"
+echo -e "Create a Nostr RSS Bot" | figlet | /usr/games/lolcat
 echo ----------------------------------------
 echo
 echo "NOTE: This script should NOT be run as root."
