@@ -41,6 +41,14 @@ echo =====================
 nospy private
 echo =====================
 
+echo "Add relays:"
+while true; do
+    read -p "Relay: " relay
+    if [ -z "$relay" ]; then
+        break
+    fi
+    nospy relay-add $relay
+done
 
 # CREATE SCRAPING SCRIPT
 # it's crucial to remember that inside the here-document (<<EOF ... EOF), variables are expanded when the document is created. This means you need to escape the dollar signs $ with backslashes \ for variables that you want to be evaluated when the script scrape@$username.sh is run, not when it's created.

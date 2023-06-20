@@ -45,3 +45,4 @@ alias enable_bot="if [ ! -f ~/enable_bot ]; then echo 'need to download script..
 
 
 https://feeds.macrumors.com/MacRumors-All
+nsec1zmmgrpxhaa2l0v05rlrtrlk9fkv2aayp38qwvaxca3g92ku2q5squf509x
