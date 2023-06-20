@@ -1,0 +1,83 @@
+#!/bin/bash
+
+echo
+echo "NOTE: This script should NOT be run as root."
+echo
+echo "This script creates an rss scraping script and configures nospy for the new bot account."
+read -p "Press Enter to continue or Ctrl+C to cancel."
+echo
+
+# SET USERNAME
+read -p "nostr-bot username: " username
+export NOSPY_USER=$username
+if [ -z "$NOSPY_USER" ]; then
+    echo "username cannot be empty"
+    exit 1
+fi
+
+export linuxuser=satoshi
+export script_filename=rss@$NOSPY_USER
+export script_fullpath=/home/$linuxuser/$script_filename
+
+
+# SET RSS URL
+echo
+read -p "RSS feed URL: " rssurl
+if [ -z "$rssurl" ]; then
+    echo "RSS feed URL cannot be empty"
+    exit 1
+fi
+
+
+# SET PRIVATE KEY
+# old way: nospy setprivate $(nospy keygen --noformat | head -n 1)
+echo
+read -p "Private key (press Enter to generate a new one): " private_key
+if [ -z "$private_key" ]; then
+    private_key=$(nospy keygen --noformat | head -n 1)
+fi
+nospy setprivate $private_key
+
+echo =====================
+nospy private
+echo =====================
+
+echo "Add relays:"
+while true; do
+    read -p "Relay: " relay
+    if [ -z "$relay" ]; then
+        break
+    fi
+    nospy relay-add $relay
+done
+
+
+# CREATE SCRAPING SCRIPT
+# it's crucial to remember that inside the here-document (<<EOF ... EOF), variables are expanded when the document is created.
+# This means you need to escape the dollar signs $ with backslashes \ for variables that you want to be evaluated when the script scrape@$username.sh is run, not when it's created.
+cat << EOF > "$script_fullpath"
+#!/bin/bash
+
+export NOSPY_USER=$NOSPY_USER
+
+while true; do
+    POST=\$(nosrss fetch --url=$rssurl)
+
+    if [ \$? -ne 0 ]; then
+        echo "Error: nosrss command failed"
+        exit 1
+    fi
+
+    if [[ -n "\$POST" ]]; then
+        nospy publish "\$POST"
+    else
+        echo "norsrr did not fetch any new posts."
+    fi
+
+    sleep 360 # Sleep for 6 minutes
+done
+EOF
+
+chmod +x "$script_fullpath"
+
+echo "Created $script_filename at $script_fullpath"

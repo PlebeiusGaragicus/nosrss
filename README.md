@@ -10,44 +10,55 @@ Inspired by [dergigi](https://dergigi.com/2023/01/19/how-to-build-a-nostr-gm-bot
 ## initial setup as `root` user
 
 0. Update and secure the server
-
 1. Install git, upgrade pip
-
-```sh
-apt-get install git -y
-
-pip install --upgrade pip
-```
-
 2. Install `nospy` [available here](https://github.com/plebeiusGaragicus/nospy)
+3. Install `nosrss` [available here](https://github.com/plebeiusGaragicus/nosrss)
+4. Create a new user account that will run your bots using `useradd`
+
 
 ```sh
+# update
+apt-get update && apt-get upgrade --yes
+
+# configure
+timedatectl set-timezone America/Los_Angeles
+
+# secure
+# TODO
+
+# install requirements
+apt-get install git pip --yes
+pip install --upgrade pip
+
+# install nospy
 cd
 git clone https://github.com/PlebeiusGaragicus/nospy.git
 cd nospy
 pip install -r requirements.txt
 pip install .
 
-# verify install
-which nospy
-nospy version
-```
-
-3. Install `nosrss` [available here](https://github.com/plebeiusGaragicus/nosrss)
-
-```sh
+# install nosrss
 cd
 git clone https://github.com/PlebeiusGaragicus/nosrss.git
 cd nosrss
 pip install -r requirements.txt
 pip install .
 
-# verify install
+
+# verify installs
+which nospy
+nospy version
+
 which nosrss
 nosrss version
 ```
 
-4. Create a new user account that will run your bots using `useradd`
+# **replace** `__USERNAME__` and `__PASSWORD__` below
+```sh
+# add a new user
+adduser --gecos "" __USERNAME__ --disabled-password
+echo "__USERNAME__:__PASSWORD__" | chpasswd
+```
 
 ## setup bot user account
 
