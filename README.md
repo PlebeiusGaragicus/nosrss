@@ -27,7 +27,8 @@ timedatectl set-timezone America/Los_Angeles
 # TODO
 
 # install requirements
-apt-get install git pip curl figlet --yes
+apt-get install git pip curl --yes
+apt-get install figlet lolcat --yes
 pip install --upgrade pip
 
 # install nospy
