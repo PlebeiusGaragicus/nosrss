@@ -37,7 +37,7 @@ echo
 # cat << EOF > "/etc/systemd/system/scrape@$NOSPY_USER.service"
 cat << EOF > "$service_fullpath"
 [Unit]
-Description=Scrapes some website under XXX nostr account
+Description=nostr rss bot service for nospy user $NOSPY_USER
 After=network.target
 
 [Service]
