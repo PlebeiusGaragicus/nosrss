@@ -1,36 +1,37 @@
 #!/bin/bash
 
-
 echo
-echo "This script creates the scraping script and configures nospy for the new bot account."
+echo "NOTE: This script should NOT be run as root."
+echo
+echo "This script creates an rss scraping script and configures nospy for the new bot account."
 read -p "Press Enter to continue or Ctrl+C to cancel."
 echo
 
 # SET USERNAME
 read -p "nostr-bot username: " username
 export NOSPY_USER=$username
+if [ -z "$NOSPY_USER" ]; then
+    echo "username cannot be empty"
+    exit 1
+fi
 
 export linuxuser=satoshi
-export script_filename=/home/$linuxuser/rss@$NOSPY_USER
-
-
-
-# SET USERNAME
-# if [ -z "$NOSPY_USER" ]; then
-#     read -p "nostr-bot username: " NOSPY_USER
-# else
-#     echo "using nostr-bot username: $NOSPY_USER"
-# fi
-
+export script_filename=rss@$NOSPY_USER
+export script_fullpath=/home/$linuxuser/$script_filename
 
 
 # SET RSS URL
+echo
 read -p "RSS feed URL: " rssurl
-
+if [ -z "$rssurl" ]; then
+    echo "RSS feed URL cannot be empty"
+    exit 1
+fi
 
 
 # SET PRIVATE KEY
 # old way: nospy setprivate $(nospy keygen --noformat | head -n 1)
+echo
 read -p "Private key (press Enter to generate a new one): " private_key
 if [ -z "$private_key" ]; then
     private_key=$(nospy keygen --noformat | head -n 1)
@@ -50,10 +51,11 @@ while true; do
     nospy relay-add $relay
 done
 
+
 # CREATE SCRAPING SCRIPT
-# it's crucial to remember that inside the here-document (<<EOF ... EOF), variables are expanded when the document is created. This means you need to escape the dollar signs $ with backslashes \ for variables that you want to be evaluated when the script scrape@$username.sh is run, not when it's created.
-# cat << EOF > "scrape@$NOSPY_USER.sh"
-cat << EOF > "$script_filename"
+# it's crucial to remember that inside the here-document (<<EOF ... EOF), variables are expanded when the document is created.
+# This means you need to escape the dollar signs $ with backslashes \ for variables that you want to be evaluated when the script scrape@$username.sh is run, not when it's created.
+cat << EOF > "$script_fullpath"
 #!/bin/bash
 
 export NOSPY_USER=$NOSPY_USER
@@ -76,5 +78,6 @@ while true; do
 done
 EOF
 
-# chmod +x "scrape@$NOSPY_USER.sh"
-chmod +x "$script_filename"
+chmod +x "$script_fullpath"
+
+echo "Created $script_filename at $script_fullpath"

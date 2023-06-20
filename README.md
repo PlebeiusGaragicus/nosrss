@@ -20,7 +20,11 @@ Inspired by [dergigi](https://dergigi.com/2023/01/19/how-to-build-a-nostr-gm-bot
 # update
 apt-get update && apt-get upgrade --yes
 
+# configure
+timedatectl set-timezone America/Los_Angeles
+
 # secure
+# TODO
 
 # install requirements
 apt-get install git pip --yes

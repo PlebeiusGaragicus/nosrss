@@ -3,15 +3,20 @@
 # SET USERNAME
 read -p "nostr-bot username: " username
 NOSPY_USER=$username
+if [ -z "$NOSPY_USER" ]; then
+    echo "username cannot be empty"
+    exit 1
+fi
 
-# if [ -z "$NOSPY_USER" ]; then
-#     read -p "nostr-bot username: " NOSPY_USER
-# else
-#     echo "using nostr-bot username: $NOSPY_USER"
+# read -p "script filename: " script_filename
+# if [ -z "$script_filename" ]; then
+#     echo "script name cannot be empty"
+#     exit 1
 # fi
 
 linuxuser=satoshi
-script_filename=/home/$linuxuser/rss@$NOSPY_USER
+script_filename=rss@$NOSPY_USER
+script_fullpath=/home/$linuxuser/$script_filename
 service_filename=rss@$NOSPY_USER.service
 service_fullpath=/etc/systemd/system/$service_filename
 
@@ -29,7 +34,7 @@ After=network.target
 [Service]
 User=$linuxuser
 WorkingDirectory=/home/$linuxuser
-ExecStart=/bin/bash $script_filename
+ExecStart=/bin/bash $script_fullpath
 Restart=always
 
 [Install]
