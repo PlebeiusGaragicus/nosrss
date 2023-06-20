@@ -11,7 +11,7 @@ read -p "nostr-bot username: " username
 export NOSPY_USER=$username
 
 export linuxuser=satoshi
-export script_filename=/home/$linuxuser/scrape@$NOSPY_USER.sh
+export script_filename=/home/$linuxuser/rss@$NOSPY_USER
 
 
 

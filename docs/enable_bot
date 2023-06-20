@@ -11,6 +11,7 @@ NOSPY_USER=$username
 # fi
 
 linuxuser=satoshi
+script_filename=/home/$linuxuser/rss@$NOSPY_USER
 service_filename=rss@$NOSPY_USER.service
 service_fullpath=/etc/systemd/system/$service_filename
 
@@ -28,7 +29,7 @@ After=network.target
 [Service]
 User=$linuxuser
 WorkingDirectory=/home/$linuxuser
-ExecStart=/bin/bash $service_fullpath
+ExecStart=/bin/bash $script_filename
 Restart=always
 
 [Install]
