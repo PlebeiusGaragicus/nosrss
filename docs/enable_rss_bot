@@ -1,5 +1,15 @@
 #!/bin/bash
 
+figlet -f slant "Enable a Nostr RSS Bot"
+echo ----------------------------------------
+echo
+echo "NOTE: This script SHOULD be run as root."
+echo
+echo "This script creates an systemd service for an already-created nostr bot script."
+echo
+read -p "Press Enter to continue or Ctrl+C to cancel."
+echo
+
 # SET USERNAME
 read -p "nostr-bot username: " username
 NOSPY_USER=$username
@@ -8,14 +18,13 @@ if [ -z "$NOSPY_USER" ]; then
     exit 1
 fi
 
-# read -p "script filename: " script_filename
-# if [ -z "$script_filename" ]; then
-#     echo "script name cannot be empty"
-#     exit 1
-# fi
+read -p "script filename: (leave blank to default to rss@$NOSPY_USER)" script_filename
+if [ -z "$script_filename" ]; then
+    script_filename=rss@$NOSPY_USER
+fi
 
 linuxuser=satoshi
-script_filename=rss@$NOSPY_USER
+# script_filename=rss@$NOSPY_USER
 script_fullpath=/home/$linuxuser/$script_filename
 service_filename=rss@$NOSPY_USER.service
 service_fullpath=/etc/systemd/system/$service_filename

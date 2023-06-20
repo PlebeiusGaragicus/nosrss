@@ -1,9 +1,12 @@
 #!/bin/bash
 
+figlet -f slant "Create a Nostr RSS Bot"
+echo ----------------------------------------
 echo
 echo "NOTE: This script should NOT be run as root."
 echo
 echo "This script creates an rss scraping script and configures nospy for the new bot account."
+echo
 read -p "Press Enter to continue or Ctrl+C to cancel."
 echo
 
@@ -80,4 +83,5 @@ EOF
 
 chmod +x "$script_fullpath"
 
+echo
 echo "Created $script_filename at $script_fullpath"
