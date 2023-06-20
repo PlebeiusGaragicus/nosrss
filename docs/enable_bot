@@ -1,9 +1,5 @@
 #!/bin/bash
 
-linuxuser=satoshi
-service_filename=rss@$NOSPY_USER.service
-service_fullpath=/etc/systemd/system/$service_filename
-
 # SET USERNAME
 read -p "nostr-bot username: " username
 NOSPY_USER=$username
@@ -14,8 +10,13 @@ NOSPY_USER=$username
 #     echo "using nostr-bot username: $NOSPY_USER"
 # fi
 
+linuxuser=satoshi
+service_filename=rss@$NOSPY_USER.service
+service_fullpath=/etc/systemd/system/$service_filename
+
 echo
 echo "Creating systemd service for $NOSPY_USER"
+echo "$service_fullpath"
 echo
 
 # cat << EOF > "/etc/systemd/system/scrape@$NOSPY_USER.service"
