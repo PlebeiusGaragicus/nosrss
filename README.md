@@ -1,20 +1,17 @@
 # nostr rss
 
-Inspired by [dergigi](https://dergigi.com/2023/01/19/how-to-build-a-nostr-gm-bot/) and [fiatjaf](https://github.com/fiatjaf/noscl)
+Inspired by [dergigi](https://dergigi.com/2023/01/19/how-to-build-a-nostr-gm-bot/) and [fiatjaf](https://github.com/fiatjaf/noscl).
 
 
 # Instructions for setting up an RSS-scraping nostr bot
 
-1. Use a hosted linux server (or whatever spare hardware you have)
+1. Use a hosted linux server (or whatever spare hardware you have).
 
 ## initial setup as `root` user
 
-0. Update and secure the server
-1. Install git, upgrade pip
+0. Update, configure, secure and install dependencies.
 2. Install `nospy` [available here](https://github.com/plebeiusGaragicus/nospy)
 3. Install `nosrss` [available here](https://github.com/plebeiusGaragicus/nosrss)
-4. Create a new user account that will run your bots using `useradd`
-
 
 ```sh
 # update
@@ -26,7 +23,7 @@ timedatectl set-timezone America/Los_Angeles
 # secure
 # TODO
 
-# install requirements
+# install dependencies
 apt-get install git pip curl --yes
 apt-get install figlet lolcat --yes
 pip install --upgrade pip
@@ -54,7 +51,9 @@ which nosrss
 nosrss version
 ```
 
-# **replace** `__USERNAME__` and `__PASSWORD__` below
+4. Create a new user account that will run your bots using `adduser`
+
+NOTE: **replace** `__USERNAME__` and `__PASSWORD__` below
 ```sh
 # add a new user
 adduser --gecos "" __USERNAME__ --disabled-password
@@ -63,60 +62,68 @@ echo "__USERNAME__:__PASSWORD__" | chpasswd
 
 ## setup bot user account
 
-1. Login as the new user your just created
+1. Login as the new user you just created.
 
-2. Setup `nospy` with a private key, add needed relays and ensure profile the is setup
-
-NOTE: `nospy` is now multi-user capable so remember to set `export NOSPY_USER=<nostr_user>` while setting up each bot account with `nospy`
-
-3. Create bot script in home directory - see example:
-
-NOTE: Replace <nostr_user> with the username you setup `nospy` with
-
-NOTE: Replace <RSS_URL> with the URL of the RSS feed you are scraping.
+2. Download needed scripts and make directories.
 
 ```sh
-#!/bin/bash
+curl -s -o ~/run_nostr_bots https://raw.githubusercontent.com/PlebeiusGaragicus/nosrss/main/scripts/run_nostr_bots
+chmod +x ~/run_nostr_bots
 
-export NOSPY_USER=<nospy_user>
+curl -s -o ~/rss_bot https://raw.githubusercontent.com/PlebeiusGaragicus/nosrss/main/scripts/rss_bot
+chmod +x ~/rss_bot
 
-while true; do
-    POST=$(nosrss fetch --url=<RSS_URL>)
+curl -s -o ~/add_rss_bot https://raw.githubusercontent.com/PlebeiusGaragicus/nosrss/main/scripts/add_rss_bot
+chmod +x ~/add_rss_bot
 
-    if [ $? -ne 0 ]; then
-        echo "Error: nosrss command failed"
-        exit 1
-    fi
-
-    if [[ -n "$POST" ]]; then
-        nospy publish "$POST"
-    else
-        echo "norsrr did not fetch any new posts."
-    fi
-
-    sleep 360 # Sleep for 6 minutes
-done
+mkdir ~/active_bots
+mkdir ~/disabled_bots
 ```
 
-4. make executible via: `chmod +x ./<YOUR_SCRIPT>`
+3. Use `./add_rss_bot` to configure a new nospy user and generate a bot .env file.
 
-## setup system service as `root` user
+4. Verify the generated .env file is correct, if so move to `~/active_bots`.
 
-1. Login as root user
+The bot .env file should be in the form:
+```sh
+# 
+export NOSPY_USER=...
+export RSS_FEED_URL=...
+export BEHAVIOR_SCRIPT=...
+```
 
-2. Create new `systemd` service file: `nano /etc/systemd/system/<SERVICE_NAME>.service`
+## setup systemd service as `root` user
 
-NOTE: use the linux user name and script file you just setup for this bot
+1. Login as `root`.
 
+2. Use `./setup_bot_service` to create and run a new `systemd` service
+
+```sh
+curl -s -o ~/setup_bot_service https://raw.githubusercontent.com/PlebeiusGaragicus/nosrss/main/scripts/setup_bot_service
+chmod +x ~/setup_bot_service
+./setup_bot_service
+```
+
+...or do it manually...
+
+---
+
+```sh
+nano /etc/systemd/system/nostr-bots.service
+```
+
+NOTE: use the linux user name you just setup.
 ```
 [Unit]
-Description=Scrapes some website under XXX nostr account
+Description=nostr bot service
 After=network.target
 
 [Service]
-User=<LINUX_USERNAME>
-WorkingDirectory=/home/<LINUX_USERNAME>
-ExecStart=/bin/bash /home/<LINUX_USERNAME>/<SCRIPT_NAME>
+User=satoshi
+WorkingDirectory=/home/satoshi
+ExecStart=/bin/bash /home/satoshi/run_nostr_bots
+StandardOutput=append:/home/satoshi/nostr-bots.log
+StandardError=inherit
 Restart=always
 
 [Install]
@@ -128,19 +135,19 @@ WantedBy=multi-user.target
 NOTE: use the service name you just setup above
 
 ```sh
-# Run the following command to make systemd aware of your new service:
-sudo systemctl daemon-reload
+# make systemd aware of your new service:
+systemctl daemon-reload
 
-# To start your newly created service, run the following command:
-sudo systemctl start <SERVICE_NAME>.service
+# start your newly created service
+systemctl start nostr-bots.service
 
-# If you want your service to start automatically when the system boots, run the following command:
-sudo systemctl enable <SERVICE_NAME>.service
+# start service automatically when the system boots
+systemctl enable nostr-bots.service
 
 # disable a service from starting automatically:
-sudo systemctl disable <SERVICE_NAME>.service
-# Removed /etc/systemd/system/multi-user.target.wants/<SERVICE_NAME>.service
+systemctl disable nostr-bots.service
+# Removed /etc/systemd/system/multi-user.target.wants/nostr-bots.service
 
-# To check the status of your service, run the following command:
-sudo systemctl status <SERVICE_NAME>.service
+# check the status of your service
+systemctl status nostr-bots.service
 ```

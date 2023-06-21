@@ -1,0 +1,55 @@
+#!/bin/bash
+
+# if NOT root... exit
+if [[ $(id -u) -eq 0 ]] ; then
+    echo -e "\n\n\n"
+    echo -e "Enable a Nostr RSS Bot" | figlet | /usr/games/lolcat
+    echo ----------------------------------------
+    echo
+    echo -e "This script creates an \e[1;33msystemd\e[0m service for an already-configured nostr bot."
+    echo
+    echo "NOTE: this script will start the systemd script immediately."
+    echo
+    echo -e "Press \e[1;34mEnter\e[0m to continue or \e[1;31mCtrl+C\e[0m to cancel."
+    echo
+    echo ----------------------------------------
+    read
+    echo
+else
+    echo "This script should be run as root."
+    exit 1
+fi
+
+
+linuxuser=satoshi
+service_filename=nostr-bots.service
+service_fullpath=/etc/systemd/system/$service_filename
+
+cat << EOF > "$service_fullpath"
+[Unit]
+Description=nostr bot service
+After=network.target
+
+[Service]
+User=$linuxuser
+WorkingDirectory=/home/$linuxuser
+ExecStart=/bin/bash /home/$linuxuser/run_nostr_bots
+StandardOutput=append:/home/$linuxuser/nostr-bots.log
+StandardError=inherit
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+echo
+echo "Created systemd service: $service_fullpath"
+echo
+
+# make systemd aware of new service
+systemctl daemon-reload
+systemctl start $service_filename
+sleep 1
+systemctl enable $service_filename
+sleep 1
+systemctl status $service_filename
