@@ -1,0 +1,76 @@
+#!/bin/bash
+
+# if root... exit
+if [[ $(id -u) -eq 0 ]] ; then
+    echo "This script should NOT be run as root."
+    exit 1
+else
+    echo -e "\n\n\n"
+    echo -e "Create a Nostr RSS Bot" | figlet | /usr/games/lolcat
+    echo ----------------------------------------
+    echo
+    echo -e "This script creates an rss scraping script and configures \e[1;33mnospy\e[0m for the new bot account."
+    echo
+    echo -e "Press \e[1;34mEnter\e[0m to continue or \e[1;31mCtrl+C\e[0m to cancel."
+    echo
+    echo ----------------------------------------
+    read
+fi
+
+
+# SET USERNAME
+echo
+read -p "nostr-bot username: " username
+export NOSPY_USER=$username
+if [ -z "$NOSPY_USER" ]; then
+    echo "username cannot be empty"
+    exit 1
+fi
+
+
+# SET RSS URL
+echo
+read -p "RSS feed URL: " RSS_FEED_URL
+if [ -z "$RSS_FEED_URL" ]; then
+    echo "RSS feed URL cannot be empty"
+    exit 1
+fi
+
+
+# SET PRIVATE KEY
+# old way: nospy setprivate $(nospy keygen --noformat | head -n 1)
+echo
+read -p "Private key (press Enter to generate a new one): " private_key
+if [ -z "$private_key" ]; then
+    private_key=$(nospy keygen --noformat | head -n 1)
+    nospy setprivate $private_key
+    echo =====================
+    nospy private
+    echo =====================
+else
+    nospy setprivate $private_key
+fi
+
+
+echo "Add relays:"
+while true; do
+    read -p "Relay: " relay
+    if [ -z "$relay" ]; then
+        break
+    fi
+    nospy relay-add $relay
+done
+
+
+# CREATE BOT .ENV FILE
+# it's crucial to remember that inside the here-document (<<EOF ... EOF), variables are expanded when the document is created.
+# This means you need to escape the dollar signs $ with backslashes \ for variables that you want to be evaluated when the script scrape@$username.sh is run, not when it's created.
+cat << EOF > "$NOSPY_USER.env"
+export NOSPY_USER=$NOSPY_USER
+export RSS_FEED_URL="$RSS_FEED_URL"
+export BEHAVIOR_SCRIPT=rss_bot
+EOF
+
+echo
+echo "created $NOSPY_USER.env"
+echo

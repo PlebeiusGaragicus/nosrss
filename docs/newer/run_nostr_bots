@@ -23,6 +23,7 @@ for env_file in ./active_bots/*.env; do
     fi
 done
 
+echo "..."
 echo "sleeping 360 seconds..."
 sleep 360
 

@@ -22,7 +22,7 @@ if [ $? -ne 0 ]; then
 fi
 
 if [[ -n "$POST" ]]; then
-    echo "posing: $POST"
+    echo "posting: $POST"
     nospy publish "$POST"
 else
     echo "norsrr did not fetch any new posts."
