@@ -1,0 +1,31 @@
+#!/bin/bash
+
+echo "running rss_bot for '$NOSPY_USER'"
+
+if [ -z "$NOSPY_USER" ]; then
+    echo "NOSPY_USER environment variable is not set"
+    exit 1
+fi
+# echo "NOSPY_USER: $NOSPY_USER"
+
+if [ -z "$RSS_FEED_URL" ]; then
+    echo "RSS_FEED_URL environment variable is not set"
+    exit 1
+fi
+# echo "RSS_FEED_URL: $RSS_FEED_URL"
+
+POST=$(nosrss fetch --url=$RSS_FEED_URL)
+
+if [ $? -ne 0 ]; then
+    echo "Error: nosrss command failed"
+    exit 1
+fi
+
+if [[ -n "$POST" ]]; then
+    echo "posing: $POST"
+    nospy publish "$POST"
+else
+    echo "norsrr did not fetch any new posts."
+fi
+
+exit 0

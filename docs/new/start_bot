@@ -1,0 +1,94 @@
+#!/bin/bash
+
+# NOTE: you can pass in NOSPY_USER as an argument to this script...
+#       ...it will start the service automatically and enable it to start on boot
+
+# if NOT root... exit
+if [[ $(id -u) -eq 0 ]] ; then
+    echo -e "\n\n\n"
+    echo -e "Enable a Nostr RSS Bot" | figlet | /usr/games/lolcat
+    echo ----------------------------------------
+    echo
+    echo -e "This script creates an \e[1;33msystemd\e[0m service for an already-configured nostr bot."
+    echo
+    echo -e "Press \e[1;34mEnter\e[0m to continue or \e[1;31mCtrl+C\e[0m to cancel."
+    echo
+    echo ----------------------------------------
+    read
+    echo
+else
+    echo "This script should be run as root."
+    exit 1
+fi
+
+
+# SET USERNAME
+# if NOSPY_USER is passed in as an argument, use it
+if [ -z "$1" ]; then
+    echo -e "\e[1;33m"
+    read -p "nostr-bot username: " NOSPY_USER
+    echo -e "\e[0m"
+    if [ -z "$NOSPY_USER" ]; then
+        echo "username cannot be empty"
+        exit 1
+    fi
+else
+    NOSPY_USER=$1
+fi
+
+echo
+echo "Using username $NOSPY_USER"
+echo
+
+linuxuser=satoshi
+service_filename=rss@$NOSPY_USER.service
+service_fullpath=/etc/systemd/system/$service_filename
+
+cat << EOF > "$service_fullpath"
+[Unit]
+Description=nostr rss bot service for nospy user $NOSPY_USER
+After=network.target
+
+[Service]
+User=$linuxuser
+WorkingDirectory=/home/$linuxuser
+EnvironmentFile=-/home/$linuxuser/$NOSPY_USER.env
+ExecStart=/bin/bash /home/$linuxuser/rss_bot
+StandardOutput=append:/home/$linuxuser/$NOSPY_USER.log
+StandardError=inherit
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+echo
+echo "Created systemd service for $NOSPY_USER"
+echo
+echo "$service_fullpath"
+echo
+
+# make systemd aware of new service
+systemctl daemon-reload
+
+if [ -z "$1" ]; then
+    # start newly created service
+    echo -e "\e[1;32m"
+    echo -e "     systemctl start $service_filename"
+    # check status of service
+    echo -e "\e[1;34m"
+    echo -e "     systemctl status $service_filename"
+    # start automatically when system boots
+    echo -e "\e[1;35m"
+    echo -e "     systemctl enable $service_filename"
+    echo -e "\e[0m"
+    echo
+    echo done.
+    echo
+else
+    systemctl start $service_filename
+    sleep 1
+    systemctl enable $service_filename
+    sleep 1
+    systemctl status $service_filename
+fi

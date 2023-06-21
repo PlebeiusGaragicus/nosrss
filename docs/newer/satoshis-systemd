@@ -1,0 +1,14 @@
+[Unit]
+Description=nostr bot service
+After=network.target
+
+[Service]
+User=satoshi
+WorkingDirectory=/home/satoshi
+ExecStart=/bin/bash /home/satoshi/run_nostr_bots
+StandardOutput=append:/home/satoshi/botactivity.log
+StandardError=inherit
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

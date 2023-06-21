@@ -1,0 +1,15 @@
+[Unit]
+Description=nostr rss bot service for nospy user $NOSPY_USER
+After=network.target
+
+[Service]
+User=$linuxuser
+WorkingDirectory=/home/$linuxuser
+EnvironmentFile=-/home/$linuxuser/$NOSPY_USER.env
+ExecStart=/bin/bash /home/$linuxuser/rss_bot
+StandardOutput=append:/home/$linuxuser/$NOSPY_USER.log
+StandardError=inherit
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
